@@ -1,21 +1,23 @@
 import datetime
 import json
 from time import sleep
-
+from xhs import DataFetchError, XhsClient, help
 from playwright.sync_api import sync_playwright
-
-import xhs
-
 
 def sign(uri, data=None, a1="", web_session=""):
     for _ in range(10):
         try:
             with sync_playwright() as playwright:
-                stealth_js_path = "/Users/reajason/ReaJason/xhs/tests/stealth.min.js"
+                stealth_js_path = "./stealth.min.js"
                 chromium = playwright.chromium
 
                 # 如果一直失败可尝试设置成 False 让其打开浏览器，适当添加 sleep 可查看浏览器状态
-                browser = chromium.launch(headless=True)
+                try:
+                    browser = chromium.launch(headless=True)
+                except Exception as e:
+                    print(e)
+                
+                # print(data, a1, web_session)
 
                 browser_context = browser.new_context()
                 browser_context.add_init_script(path=stealth_js_path)
@@ -39,17 +41,17 @@ def sign(uri, data=None, a1="", web_session=""):
 
 
 if __name__ == '__main__':
-    cookie = "please get cookie from your website"
+    cookie = "a1=19318a1ce36f9rnbk4e0uhjtb5ugxd189f4o3fqot40000385867;webId=1ca6b4de0450b52cfc365d7577d51b32;gid=yjqyYj82yqlSyjqyYj84Wl0iyyi1uAEIVVlCiqEukxlIVSq83F03Dy888J2Yyj48Wf4W0D80;web_session=040069b384a77b2b8ff8990404354ba3a3eb4a"
 
-    xhs_client = xhs.XhsClient(cookie, sign=sign)
+    xhs_client = XhsClient(cookie, sign=sign)
     print(datetime.datetime.now())
 
     for _ in range(10):
         # 即便上面做了重试，还是有可能会遇到签名失败的情况，重试即可
         try:
-            note = xhs_client.get_note_by_id("6505318c000000001f03c5a6")
+            note = xhs_client.get_note_by_id("670ba05a000000001b02fea3")
             print(json.dumps(note, indent=4))
-            print(xhs.help.get_imgs_url_from_note(note))
+            print(help.get_imgs_url_from_note(note))
             break
         except Exception as e:
             print(e)
